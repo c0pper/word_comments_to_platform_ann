@@ -8,7 +8,7 @@ import zipfile
 from bs4 import BeautifulSoup as Soup
 import re
 import os
-from datetime import date, datetime
+from datetime import datetime
 from tqdm import tqdm
 
 
@@ -17,6 +17,7 @@ taxonomy = {
     "maggiori dettagli su debito": "maggiori_dettagli_debito",
     "vuole confronto diretto con mandante": "confronto_diretto_mandante",
     "volontà pagamento": "volonta_pagamento",
+    "volontà di pagamento": "volonta_pagamento",
     "rifiuta pagamento": "rifiuta_pagamento",
     "contestazione": "contestazione",
     "potenziale reclamo": "potenziale_reclamo",
@@ -46,34 +47,73 @@ extraction = {
 }
 
 
-highlited_only_mode = False
+highlited_only_mode = True
 
 
 def create_ann_file(docfile, comments_dicts):
-
-    with open(tax_ann_folder+"/"+docfile.split('.')[0]+".ann", 'a', encoding="utf-8") as ann:
-        tax_count = 1
-        for c in comments_dicts:
+    if highlited_only_mode:
+        for idx, c in enumerate(comments_dicts):
             if c['comment'].lower() in taxonomy:
-                ann.write(f"C{tax_count}		{taxonomy[c['comment'].lower()]}\n")
-                tax_count +=1
-        ann.close()
+                with open(tax_ann_folder+"/"+docfile.split('.')[0]+"_"+str(idx)+".ann", 'a', encoding="utf-8") as ann:
+                    tax_count = 1
+                    print("TAX: ", c["text"])
+                    ann.write(f"C{tax_count}		{taxonomy[c['comment'].lower()]}\n")
+                    ann.close()
 
-    with open(xtr_ann_folder+"/"+docfile.split('.')[0]+".ann", 'a', encoding="utf-8") as ann:
-        xtr_count = 1
-        for c in comments_dicts:
-            if c["start"] == -1:
-                # raise Exception(f"'{c['text']}' not found in text ({docfile.split('.')[0]})")
-                pass
-            elif c['comment'].lower() in extraction:
-                ann.write(f"T{xtr_count}		{extraction[c['comment'].lower()]} {c['start']} {c['end']}	{c['text']}\n")
-                xtr_count +=1
-        ann.close()
+
+            if c['comment'].lower() in extraction:
+                with open(xtr_ann_folder+"/"+docfile.split('.')[0]+"_"+str(idx)+".ann", 'a', encoding="utf-8") as ann:
+                    xtr_count = 1
+                    if c["start"] == -1:
+                        # raise Exception(f"'{c['text']}' not found in text ({docfile.split('.')[0]})")
+                        pass
+                    else:
+                        print("XTR: ", c["text"])
+                        ann.write(f"T{xtr_count}		{extraction[c['comment'].lower()]} {c['start']} {c['end']}	{c['text']}\n")
+                    ann.close()
+
+    else:
+        if c['comment'].lower() in taxonomy:
+            with open(tax_ann_folder+"/"+docfile.split('.')[0]+".ann", 'a', encoding="utf-8") as ann:
+                tax_count = 1
+                for c in comments_dicts:
+                    ann.write(f"C{tax_count}		{taxonomy[c['comment'].lower()]}\n")
+                    tax_count +=1
+                ann.close()
+
+        if c['comment'].lower() in extraction:
+            with open(xtr_ann_folder+"/"+docfile.split('.')[0]+".ann", 'a', encoding="utf-8") as ann:
+                xtr_count = 1
+                for c in comments_dicts:
+                    if c["start"] == -1:
+                        # raise Exception(f"'{c['text']}' not found in text ({docfile.split('.')[0]})")
+                        pass
+                    else:
+                        ann.write(f"T{xtr_count}		{extraction[c['comment'].lower()]} {c['start']} {c['end']}	{c['text']}\n")
+                        xtr_count +=1
+                ann.close()
     print(f"Found {len(comments_dicts)} annotations")
 
 
-def create_test_file(path, docfile):
-    if not highlited_only_mode:
+def create_test_file(path, docfile, comments_dicts):
+    if highlited_only_mode:
+        for idx, c in enumerate(comments_dicts):
+            if c['comment'].lower() in taxonomy:
+                with open(tax_test_folder+"/"+docfile.split('.')[0]+"_"+str(idx)+".txt", 'w', encoding="utf-8") as file:
+                    # print(txt)
+                    file.write(c['text'])
+                    file.close()
+            
+            if c['comment'].lower() in extraction:
+                if c["start"] == -1:
+                    # raise Exception(f"'{c['text']}' not found in text ({docfile.split('.')[0]})")
+                    pass
+                else:
+                    with open(xtr_test_folder+"/"+docfile.split('.')[0]+"_"+str(idx)+".txt", 'w', encoding="utf-8") as file:
+                        # print(txt)
+                        file.write(c['text'])
+                        file.close()
+    else:
         txt = getTextFromDoc(path+"\\"+docfile)
         txt = normalize_fucked_encoding(txt)
         txt = re.sub(' +', ' ', txt)
@@ -168,14 +208,14 @@ if __name__ == "__main__":
     os.makedirs(xtr_ann_folder, exist_ok=True)
 
 
-    for root, dirs, files in os.walk('input_docs'):
+    for root, dirs, files in os.walk('C:\\Users\\smarotta\\PycharmProjects\\mirco_annotazioni_server_1maggio\\input_docs'):
         for f in tqdm(files):
             file_comments_dicts = return_comments_dicts(root, f)
             if "_annotato" in f:
                 print("---------\n" + "WORKING ON: " + os.path.join(root, f))
-                if return_comments_dicts(root, f) != False:
+                if file_comments_dicts != False:
                     print(root, f)
-                    create_test_file(root, f)
-                    create_ann_file(f, return_comments_dicts(root, f))
+                    create_test_file(root, f, file_comments_dicts)
+                    create_ann_file(f, file_comments_dicts)
 
     create_zip()
