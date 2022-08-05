@@ -1,9 +1,9 @@
 import docx
 from numpy import unicode_
 
-def normalize_fucked_encoding(str):
+def normalize_fucked_encoding(string):
     char_to_replace = {
-        "�": "è",
+        "�": "è", # almeno prendo la maggior parte dei verbi essere correttamente  
         "Ã¬": "ì",
         "Ã©": "é",
         "Ã²": "ò",
@@ -11,11 +11,12 @@ def normalize_fucked_encoding(str):
         "Ã": "à",
         "Ã¹": "ù",
         "à¹": "ù",
-        "Ãˆ": "È"
+        "Ãˆ": "È",
+        "�": "è",
     }
     for key, value in char_to_replace.items():
-        str = str.replace(key, value)
-    return str
+        string = string.replace(key, value)
+    return string
 
 def getTextFromDoc(filename):
     doc = docx.Document(filename)
