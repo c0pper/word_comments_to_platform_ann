@@ -273,5 +273,4 @@ if __name__ == "__main__":
                     print(root, f)
                     create_test_file(root, f, file_comments_dicts)
                     create_ann_file(f, file_comments_dicts)
-
     create_zip()
