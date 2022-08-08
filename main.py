@@ -14,7 +14,7 @@ from tqdm import tqdm
 
 taxonomy = {
     #  entità operatore
-    "presentazione società": "presentazione_società",
+    "presentazione società": "presentazione_societa",
     "presentazione prodotto": "presentazione_prodotto",
     "dettaglio esposizione": "dettaglio_esposizione",
     "interlocutore alternativo": "interlocutore_alternativo",
@@ -25,7 +25,7 @@ taxonomy = {
     "appuntamento": "appuntamento",
     "bene finanziato": "bene_finanziato",
     "situazione economica": "situazione_economica",
-    "altre disponibilità": "altre_disponibilità",
+    "altre disponibilità": "altre_disponibilita",
     "nucleo familiare": "nucleo_familiare",
     "capacità di rimborso": "capacita_di_rimborso",
     "impegni economici": "impegni_economici",
@@ -265,7 +265,7 @@ if __name__ == "__main__":
 
 
     for root, dirs, files in os.walk('C:\\Users\\smarotta\\Desktop\\trasc_ann\\post_11-07-22'):
-        for f in tqdm(files[:100]):
+        for f in tqdm(files):
             print("---------\n" + "WORKING ON: " + os.path.join(root, f))
             file_comments_dicts = return_comments_dicts(root, f)
             if "_annotato" in f:
