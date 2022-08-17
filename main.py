@@ -270,7 +270,7 @@ if __name__ == "__main__":
 
 
     for root, dirs, files in os.walk('C:\\Users\\smarotta\\Desktop\\trasc_ann\\post_11-07-22'):
-        for f in tqdm(files[:20]):
+        for f in tqdm(files):
             print("---------\n" + "WORKING ON: " + os.path.join(root, f))
             file_comments_dicts = return_comments_dicts(root, f)
             if "_annotato" in f:
