@@ -89,9 +89,6 @@ extraction = {
 }
 
 
-highlited_only_mode = True #  se True, invece che creare un annotazione dell'intero documento, crea un annotazione del segmento di testo commentato
-
-
 def return_comments_dicts(path: str, docfile: str) -> list:
     """
     In a word file, for every comment in it creates a dict with the text of the comment, the text on which the comment was placed, the start character of the comment and the end character of the comment.
@@ -104,7 +101,16 @@ def return_comments_dicts(path: str, docfile: str) -> list:
         doc = unzip.read('word/document.xml').decode()
         txt = getTextFromDoc(path+"\\"+docfile)
         txt = re.sub('(S\d+)', r'\n\1', txt) # newline ogni enunciato
-        # print(txt)
+        txt = re.sub(' +', ' ', txt)
+        
+        #  test per provare a usare l'intero rigo dove avviene l'annotazione invece che solo la parte evidenziata
+        #  perchè a volte le annotazioni fanno cagare
+        #  non si può fare perchè rovinerebbe le estrazioni
+
+        # txt_lines = [x.strip() for x in txt.split('\n')]
+        # print(txt_lines)
+
+
         #populate comments_dicts list with dicts for every comment
         start_loc = {x.group(1): x.start() for x in re.finditer(r'<w:commentRangeStart.*?w:id="(.*?)"', doc)}
         end_loc = {x.group(1): x.end() for x in re.finditer(r'<w:commentRangeEnd.*?w:id="(.*?)".*?>', doc)}
@@ -130,6 +136,7 @@ def return_comments_dicts(path: str, docfile: str) -> list:
             
             cmt_and_txt = {"comment": cmt.split(";")[0].strip(), "text": text_reference, "start":txt.find(text_reference), "end": txt.find(text_reference)+len(text_reference)}
             print(cmt_and_txt)
+
             comments_dicts.append(cmt_and_txt)
         return comments_dicts
     except KeyError:
@@ -137,59 +144,10 @@ def return_comments_dicts(path: str, docfile: str) -> list:
         return False
 
 
-def create_ann_file(docfile: str, comments_dicts: list):
+def create_annotation_and_text_file(path: str, docfile: str, comments_dicts: list):
     """
     Highlited only mode: for every comment in the current file, create an ann file with the annotation for the text highlighted by the comment. This works better for autoML
     Non Highlited only mode: create a single ann file for the current file with all the annotations for all the comments
-    """
-    if highlited_only_mode:
-        for idx, c in enumerate(comments_dicts):
-            if c['comment'].lower() in taxonomy:
-                with open(tax_ann_folder+"/"+docfile.split('.')[0]+"_"+str(idx)+".ann", 'a', encoding="utf-8") as ann:
-                    tax_count = 1
-                    # print("TAX: ", c["text"])
-                    ann.write(f"C{tax_count}		{taxonomy[c['comment'].lower()]}\n")
-                    ann.close()
-
-
-            if c['comment'].lower() in extraction:
-                with open(xtr_ann_folder+"/"+docfile.split('.')[0]+"_"+str(idx)+".ann", 'a', encoding="utf-8") as ann:
-                    xtr_count = 1
-                    if c["start"] == -1:
-                        # raise Exception(f"'{c['text']}' not found in text ({docfile.split('.')[0]})")
-                        pass
-                    else:
-                        # print("XTR: ", c["text"])
-                        ann.write(f"T{xtr_count}		{extraction[c['comment'].lower()]} {c['start']} {c['end']}	{c['text']}\n")
-                    ann.close()
-
-    else:
-        if c['comment'].lower() in taxonomy:
-            with open(tax_ann_folder+"/"+docfile.split('.')[0]+".ann", 'a', encoding="utf-8") as ann:
-                tax_count = 1
-                for c in comments_dicts:
-                    ann.write(f"C{tax_count}		{taxonomy[c['comment'].lower()]}\n")
-                    tax_count +=1
-                ann.close()
-
-        if c['comment'].lower() in extraction:
-            with open(xtr_ann_folder+"/"+docfile.split('.')[0]+".ann", 'a', encoding="utf-8") as ann:
-                xtr_count = 1
-                for c in comments_dicts:
-                    if c["start"] == -1:
-                        # raise Exception(f"'{c['text']}' not found in text ({docfile.split('.')[0]})")
-                        pass
-                    else:
-                        ann.write(f"T{xtr_count}		{extraction[c['comment'].lower()]} {c['start']} {c['end']}	{c['text']}\n")
-                        xtr_count +=1
-                ann.close()
-    print(f"Found {len(comments_dicts)} annotations")
-
-
-def create_test_file(path: str, docfile: str, comments_dicts: list):
-    """
-    Highlited only mode: for every comment in the current file, create a txt file with the text highlighted by the comment. This works better for autoML
-    Non Highlited only mode: create a single txt file for the current file and places it both in tax folder and xtr folder
     """
     if highlited_only_mode:
         for idx, c in enumerate(comments_dicts):
@@ -198,7 +156,14 @@ def create_test_file(path: str, docfile: str, comments_dicts: list):
                     # print(txt)
                     file.write(c['text'])
                     file.close()
-            
+                    
+                with open(tax_ann_folder+"/"+docfile.split('.')[0]+"_"+str(idx)+".ann", 'a', encoding="utf-8") as ann:
+                    tax_count = 1
+                    # print("TAX: ", c["text"])
+                    ann.write(f"C{tax_count}		{taxonomy[c['comment'].lower()]}\n")
+                    ann.close()
+
+
             if c['comment'].lower() in extraction:
                 if c["start"] == -1:
                     # raise Exception(f"'{c['text']}' not found in text ({docfile.split('.')[0]})")
@@ -208,20 +173,58 @@ def create_test_file(path: str, docfile: str, comments_dicts: list):
                         # print(txt)
                         file.write(c['text'])
                         file.close()
-    else:
+                    with open(xtr_ann_folder+"/"+docfile.split('.')[0]+"_"+str(idx)+".ann", 'a', encoding="utf-8") as ann:
+                        xtr_count = 1
+                        # print("XTR: ", c["text"])
+                        ann.write(f"T{xtr_count}		{extraction[c['comment'].lower()]} {c['start']} {c['end']}	{c['text']}\n")
+                        ann.close()
+
+    if not highlited_only_mode:
+        tax_count = 1
+        xtr_count = 1
+
         txt = getTextFromDoc(path+"\\"+docfile)
         txt = normalize_fucked_encoding(txt)
         txt = re.sub(' +', ' ', txt)
         txt = re.sub('(S\d+)', r'\n\1', txt) # newline ogni enunciato
-        with open(tax_test_folder+"/"+docfile.split('.')[0]+".txt", 'w', encoding="utf-8") as file:
-            # print(txt)
-            file.write(txt)
-            file.close()
-        with open(xtr_test_folder+"/"+docfile.split('.')[0]+".txt", 'w', encoding="utf-8") as file:
-            # print(txt)
-            file.write(txt)
-            file.close()
+        tax_txt_file_path = tax_test_folder+"/"+docfile.split('.')[0]+".txt"
+        xtr_txt_file_path = xtr_test_folder+"/"+docfile.split('.')[0]+".txt"
 
+        for c in comments_dicts:
+            if c['comment'].lower() in taxonomy:
+                if not os.path.exists(tax_txt_file_path):
+                    print(f"{tax_txt_file_path} not exist")
+                    with open(tax_test_folder+"/"+docfile.split('.')[0]+".txt", 'a', encoding="utf-8") as text_file:
+                        text_file.write(txt)
+                        text_file.close()
+                else:
+                    print(f"{tax_txt_file_path} exist")
+
+                with open(tax_ann_folder+"/"+docfile.split('.')[0]+".ann", 'a', encoding="utf-8") as ann:
+                    # for c in comments_dicts:
+                    ann.write(f"C{tax_count}		{taxonomy[c['comment'].lower()]}\n")
+                    tax_count +=1
+                    ann.close()
+
+            if c['comment'].lower() in extraction:
+                if not os.path.exists(xtr_txt_file_path):
+                    print(f"{xtr_txt_file_path} not exist")
+                    with open(xtr_test_folder+"/"+docfile.split('.')[0]+".txt", 'a', encoding="utf-8") as text_file:
+                        text_file.write(txt)
+                        text_file.close()
+                else:
+                    print(f"{xtr_txt_file_path} exist")
+
+                with open(xtr_ann_folder+"/"+docfile.split('.')[0]+".ann", 'a', encoding="utf-8") as ann:
+                    # for c in comments_dicts:
+                    if c["start"] == -1:
+                        # raise Exception(f"'{c['text']}' not found in text ({docfile.split('.')[0]})")
+                        pass
+                    else:
+                        ann.write(f"T{xtr_count}		{extraction[c['comment'].lower()]} {c['start']} {c['end']}	{c['text']}\n")
+                        xtr_count +=1
+                    ann.close()
+    print(f"Found {len(comments_dicts)} annotations")
 
 
 def create_zip():
@@ -248,6 +251,8 @@ def create_zip():
 
 
 if __name__ == "__main__":
+    highlited_only_mode = True #  se True, invece che creare un annotazione dell'intero documento, crea un annotazione del segmento di testo commentato
+
     timenow = datetime.now().strftime('%d_%m_%y_%H_%M')
     tax_folder = f"runs/run_{timenow}/tax"
     xtr_folder = f"runs/run_{timenow}/xtr"
@@ -265,12 +270,11 @@ if __name__ == "__main__":
 
 
     for root, dirs, files in os.walk('C:\\Users\\smarotta\\Desktop\\trasc_ann\\post_11-07-22'):
-        for f in tqdm(files):
+        for f in tqdm(files[:20]):
             print("---------\n" + "WORKING ON: " + os.path.join(root, f))
             file_comments_dicts = return_comments_dicts(root, f)
             if "_annotato" in f:
-                if file_comments_dicts != False:
+                if file_comments_dicts:
                     print(root, f)
-                    create_test_file(root, f, file_comments_dicts)
-                    create_ann_file(f, file_comments_dicts)
+                    create_annotation_and_text_file(root, f, file_comments_dicts)
     create_zip()
