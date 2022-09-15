@@ -18,7 +18,7 @@ def normalize_fucked_encoding(string):
         string = string.replace(key, value)
     return string
 
-def getTextFromDoc(filename):
+def getTextFromDoc(filename: str) -> str:
     doc = docx.Document(filename)
     fullText = []
     for para in doc.paragraphs:

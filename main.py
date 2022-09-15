@@ -10,83 +10,17 @@ import re
 import os
 from datetime import datetime
 from tqdm import tqdm
+from entities import extraction, taxonomy
 
 
-taxonomy = {
-    #  entità operatore
-    "presentazione società": "presentazione_societa",
-    "presentazione prodotto": "presentazione_prodotto",
-    "dettaglio esposizione": "dettaglio_esposizione",
-    "interlocutore alternativo": "interlocutore_alternativo",
-    "recapiti alternativi": "recapiti_alternativi",
-    "stato attività impresa": "stato_attivita_impresa",
-    "scadenza pagamento": "scadenza_pagamento",
-    "volontà risolutiva": "volonta_risolutiva",
-    "appuntamento": "appuntamento",
-    "bene finanziato": "bene_finanziato",
-    "situazione economica": "situazione_economica",
-    "altre disponibilità": "altre_disponibilita",
-    "nucleo familiare": "nucleo_familiare",
-    "capacità di rimborso": "capacita_di_rimborso",
-    "impegni economici": "impegni_economici",
-    "proposta agevolazione": "proposta_agevolazione",
-    "proposta saldo e stralcio": "proposta_saldo_e_stralcio",
-    "proposto pdr": "proposto_pdr",
-    "proposto rifinanziamento": "proposto_rifinanziamento",
-    "proposto accodamento": "proposto_accodamento",
-    "proposto consolidamento": "proposto_consolidamento",
-    "antiusura": "antiusura",
-    "proiezione medio lungo termine": "proiezione_medio_lungo_termine",
-    "sostegno da terzi": "sostegno_da_terzi",
-    "tempistiche introiti": "tempistiche_introiti",
-    "pagamento effettuato": "pagamento_effettuato",
-    "utilizzo leve": "utilizzo_leve",
-    "conferma accordi": "conferma_accordi",
-    "estremi di pagamento": "estremi_di_pagamento",
-    "richiesto riscontro di pagamento": "richiesto_riscontro_di_pagamento",
-    "invio modulistica": "invio_modulistica",
-    "richiesta documenti": "richiesta_documenti",
-    "invito a confronto diretto": "invito_a_confronto_diretto",
+def get_txt_paths(txt):
+        txt = normalize_fucked_encoding(txt)
+        txt = re.sub(' +', ' ', txt)
+        txt = re.sub('(S\d+)', r'\n\1', txt) # newline ogni enunciato
+        tax_txt_file_path = tax_test_folder+"/"+docfile.split('.')[0]+".txt"
+        xtr_txt_file_path = xtr_test_folder+"/"+docfile.split('.')[0]+".txt"
 
-    #  entità debitore
-    "non è a conoscenza del debito": "ignora_debito",
-    "maggiori dettagli su debito": "maggiori_dettagli_debito",
-    "vuole confronto diretto con mandante": "confronto_diretto_mandante",
-    "volontà pagamento": "volonta_pagamento",
-    "volontà di pagamento": "volonta_pagamento",
-    "rifiuta pagamento": "rifiuta_pagamento",
-    "contestazione": "contestazione",
-    "potenziale reclamo": "potenziale_reclamo",
-    "in attesa liquidità": "attesa_liquidita",
-    "richiesta agevolazione": "richiesta_agevolazione",
-    "chiede/rimanda appuntamento": "chiede_rimanda_appuntamento",
-    "rimanda appuntamento": "chiede_rimanda_appuntamento",
-    "chiede appuntamento": "chiede_rimanda_appuntamento",
-    "dettagli su modalità di pagamento": "dettagli_modalita_pagamento",
-    "cliente assente": "cliente_assente",
-    "reale interlocutore": "reale_interlocutore",
-    "stato attività impresa": "stato_attivita_impresa",
-    "difficoltà economiche": "difficolta_economiche",
-    "salute": "salute",
-    "accordi presenti": "accordi_presenti",
-    "procedimento legale": "procedimento_legale",
-    "debito già pagato": "debito_gia_pagato",
-    "pagamento non effettuato": "pagamento_non_effettuato",
-    "proposta agevolazione": "proposta_agevolazione",
-    "ha qualcuno che lo può aiutare": "ha_qualcuno_che_puo_aiutare",
-    "ha fonti di reddito": "ha_fonti_reddito",
-    "garanzie": "garanzie",
-    "modulistica": "modulistica",
-}
-extraction = {
-    #  entità operatore
-
-    
-    #  entità debitore
-    "data pagamento": "data_pagamento",
-    "importo sostenibile": "importo_sostenibile",
-    "prospettiva temporale": "prospettiva_temporale"
-}
+        return (tax_txt_file_path, xtr_txt_file_path)
 
 
 def return_comments_dicts(path: str, docfile: str) -> list:
@@ -155,13 +89,11 @@ def create_annotation_and_text_file(path: str, docfile: str, comments_dicts: lis
                 with open(tax_test_folder+"/"+docfile.split('.')[0]+"_"+str(idx)+".txt", 'w', encoding="utf-8") as file:
                     # print(txt)
                     file.write(c['text'])
-                    file.close()
                     
                 with open(tax_ann_folder+"/"+docfile.split('.')[0]+"_"+str(idx)+".ann", 'a', encoding="utf-8") as ann:
                     tax_count = 1
                     # print("TAX: ", c["text"])
                     ann.write(f"C{tax_count}		{taxonomy[c['comment'].lower()]}\n")
-                    ann.close()
 
 
             if c['comment'].lower() in extraction:
@@ -172,23 +104,24 @@ def create_annotation_and_text_file(path: str, docfile: str, comments_dicts: lis
                     with open(xtr_test_folder+"/"+docfile.split('.')[0]+"_"+str(idx)+".txt", 'w', encoding="utf-8") as file:
                         # print(txt)
                         file.write(c['text'])
-                        file.close()
                     with open(xtr_ann_folder+"/"+docfile.split('.')[0]+"_"+str(idx)+".ann", 'a', encoding="utf-8") as ann:
                         xtr_count = 1
                         # print("XTR: ", c["text"])
                         ann.write(f"T{xtr_count}		{extraction[c['comment'].lower()]} {c['start']} {c['end']}	{c['text']}\n")
-                        ann.close()
 
     if not highlited_only_mode:
         tax_count = 1
         xtr_count = 1
-
+        
         txt = getTextFromDoc(path+"\\"+docfile)
-        txt = normalize_fucked_encoding(txt)
-        txt = re.sub(' +', ' ', txt)
-        txt = re.sub('(S\d+)', r'\n\1', txt) # newline ogni enunciato
-        tax_txt_file_path = tax_test_folder+"/"+docfile.split('.')[0]+".txt"
-        xtr_txt_file_path = xtr_test_folder+"/"+docfile.split('.')[0]+".txt"
+        tax_txt_file_path, xtr_txt_file_path = get_txt_paths(txt)
+
+        # txt = getTextFromDoc(path+"\\"+docfile)
+        # txt = normalize_fucked_encoding(txt)
+        # txt = re.sub(' +', ' ', txt)
+        # txt = re.sub('(S\d+)', r'\n\1', txt) # newline ogni enunciato
+        # tax_txt_file_path = tax_test_folder+"/"+docfile.split('.')[0]+".txt"
+        # xtr_txt_file_path = xtr_test_folder+"/"+docfile.split('.')[0]+".txt"
 
         for c in comments_dicts:
             if c['comment'].lower() in taxonomy:
@@ -196,7 +129,6 @@ def create_annotation_and_text_file(path: str, docfile: str, comments_dicts: lis
                     print(f"{tax_txt_file_path} not exist")
                     with open(tax_test_folder+"/"+docfile.split('.')[0]+".txt", 'a', encoding="utf-8") as text_file:
                         text_file.write(txt)
-                        text_file.close()
                 else:
                     print(f"{tax_txt_file_path} exist")
 
@@ -204,14 +136,12 @@ def create_annotation_and_text_file(path: str, docfile: str, comments_dicts: lis
                     # for c in comments_dicts:
                     ann.write(f"C{tax_count}		{taxonomy[c['comment'].lower()]}\n")
                     tax_count +=1
-                    ann.close()
 
             if c['comment'].lower() in extraction:
                 if not os.path.exists(xtr_txt_file_path):
                     print(f"{xtr_txt_file_path} not exist")
                     with open(xtr_test_folder+"/"+docfile.split('.')[0]+".txt", 'a', encoding="utf-8") as text_file:
                         text_file.write(txt)
-                        text_file.close()
                 else:
                     print(f"{xtr_txt_file_path} exist")
 
@@ -223,7 +153,6 @@ def create_annotation_and_text_file(path: str, docfile: str, comments_dicts: lis
                     else:
                         ann.write(f"T{xtr_count}		{extraction[c['comment'].lower()]} {c['start']} {c['end']}	{c['text']}\n")
                         xtr_count +=1
-                    ann.close()
     print(f"Found {len(comments_dicts)} annotations")
 
 
