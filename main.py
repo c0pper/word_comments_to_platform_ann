@@ -3,6 +3,7 @@
 # This is version 6.0 of the script
 # Date: 12 February 2020
 
+from ast import Raise
 from doc_converter import getTextFromDoc, normalize_fucked_encoding
 import zipfile
 from bs4 import BeautifulSoup as Soup
@@ -182,28 +183,31 @@ def create_zip():
 if __name__ == "__main__":
     highlited_only_mode = True #  se True, invece che creare un annotazione dell'intero documento, crea un annotazione del segmento di testo commentato
 
-    timenow = datetime.now().strftime('%d_%m_%y_%H_%M')
-    tax_folder = f"runs/run_{timenow}/tax"
-    xtr_folder = f"runs/run_{timenow}/xtr"
-    tax_test_folder = f"runs/run_{timenow}/tax/test"
-    tax_ann_folder = f"runs/run_{timenow}/tax/ann"
-    xtr_test_folder = f"runs/run_{timenow}/xtr/test"
-    xtr_ann_folder = f"runs/run_{timenow}/xtr/ann"
-    os.makedirs("runs", exist_ok=True)
-    os.makedirs(tax_folder, exist_ok=True)
-    os.makedirs(xtr_folder, exist_ok=True)
-    os.makedirs(tax_test_folder, exist_ok=True)
-    os.makedirs(tax_ann_folder, exist_ok=True)
-    os.makedirs(xtr_test_folder, exist_ok=True)
-    os.makedirs(xtr_ann_folder, exist_ok=True)
+    runs_folder_path = input("input the path where the run output should be stored: ").replace("\\","/")
+    if os.path.exists(runs_folder_path):
+        timenow = datetime.now().strftime('%d_%m_%y_%H_%M')
+        tax_folder = f"{runs_folder_path}/run_{timenow}/tax"
+        xtr_folder = f"{runs_folder_path}/run_{timenow}/xtr"
+        tax_test_folder = f"{runs_folder_path}/run_{timenow}/tax/test"
+        tax_ann_folder = f"{runs_folder_path}/run_{timenow}/tax/ann"
+        xtr_test_folder = f"{runs_folder_path}/run_{timenow}/xtr/test"
+        xtr_ann_folder = f"{runs_folder_path}/run_{timenow}/xtr/ann"
+        os.makedirs(tax_folder, exist_ok=True)
+        os.makedirs(xtr_folder, exist_ok=True)
+        os.makedirs(tax_test_folder, exist_ok=True)
+        os.makedirs(tax_ann_folder, exist_ok=True)
+        os.makedirs(xtr_test_folder, exist_ok=True)
+        os.makedirs(xtr_ann_folder, exist_ok=True)
 
 
-    for root, dirs, files in os.walk('C:\\Users\\smarotta\\Desktop\\trasc_ann\\post_11-07-22'):
-        for f in tqdm(files):
-            print("---------\n" + "WORKING ON: " + os.path.join(root, f))
-            file_comments_dicts = return_comments_dicts(root, f)
-            if "_annotato" in f:
-                if file_comments_dicts:
-                    print(root, f)
-                    create_annotation_and_text_file(root, f, file_comments_dicts)
-    create_zip()
+        for root, dirs, files in os.walk('C:\\Users\\smarotta\\Desktop\\trasc_ann\\post_11-07-22'):
+            for f in tqdm(files):
+                print("---------\n" + "WORKING ON: " + os.path.join(root, f))
+                file_comments_dicts = return_comments_dicts(root, f)
+                if "_annotato" in f:
+                    if file_comments_dicts:
+                        print(root, f)
+                        create_annotation_and_text_file(root, f, file_comments_dicts)
+        create_zip()
+    else:
+        raise Exception(f"Path {runs_folder_path} doesn't exist")
