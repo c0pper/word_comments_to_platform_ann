@@ -49,10 +49,13 @@ def return_comments_dicts(doc_file_path: Path) -> Union[list, bool]:
             cmt = ''.join(c.findAll(text=True))
             cmt = re.sub(' +', ' ', cmt)
             text_reference_soup = Soup(xml, 'lxml').findAll(text=True)
+            # print(text_reference_soup)
             if len(text_reference_soup) > 1:
                 text_reference = "".join(text_reference_soup)
-            else:
+            elif len(text_reference_soup) == 1:
                 text_reference = text_reference_soup[0]
+            else:
+                text_reference = "text reference not found"
 
             text_reference = normalize_fucked_encoding(text_reference)
             text_reference = re.sub(' +', ' ', text_reference)
@@ -60,7 +63,7 @@ def return_comments_dicts(doc_file_path: Path) -> Union[list, bool]:
 
             cmt_and_txt = {"comment": cmt.split(";")[0].strip(), "text": text_reference,
                            "start": txt.find(text_reference), "end": txt.find(text_reference) + len(text_reference)}
-            print(cmt_and_txt)
+            # print(cmt_and_txt)
 
             comments_dicts.append(cmt_and_txt)
         return comments_dicts
