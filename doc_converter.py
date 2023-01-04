@@ -1,9 +1,23 @@
-import docx
-from numpy import unicode_
+"""
+    doc_converter.py
+    ----------------
 
-def normalize_fucked_encoding(string):
+    This module contains helper functions to retrieve and process the text extracted from docx files
+"""
+
+import docx
+from pathlib import Path
+
+
+def normalize_fucked_encoding(string) -> str:
+    """
+    Manually replace bad characters. See https://www.i18nqa.com/debug/utf8-debug.html
+
+    :param string: text to be normalized
+    :return: normalized string
+    """
     char_to_replace = {
-        "�": "è", # almeno prendo la maggior parte dei verbi essere correttamente  
+        "�": "è",  # almeno prendo la maggior parte dei verbi essere correttamente
         "Ã¬": "ì",
         "Ã©": "é",
         "Ã²": "ò",
@@ -12,18 +26,23 @@ def normalize_fucked_encoding(string):
         "Ã¹": "ù",
         "à¹": "ù",
         "Ãˆ": "È",
-        "�": "è",
     }
     for key, value in char_to_replace.items():
         string = string.replace(key, value)
     return string
 
-def getTextFromDoc(filename: str) -> str:
+
+def get_text_from_doc(filename: Path) -> str:
+    """
+    Retrieve text from docx file
+
+    :param filename: path of a single word document (.docx)
+    :return: text in string form
+    """
     doc = docx.Document(filename)
-    fullText = []
+    full_text = []
     for para in doc.paragraphs:
         para.text = normalize_fucked_encoding(para.text)
-        fullText.append(para.text)
-    return ''.join(fullText).encode('cp1252').decode('ISO-8859-1')
+        full_text.append(para.text)
+    return ''.join(full_text).encode('cp1252').decode('ISO-8859-1')
 
-# print(getTextFromDoc("input_docs/BANCA AGRICOLA POPOLARE DI RAGUSA SOC. COOP. PER AZIONI/2039349906/annotazioni2039349906_202106241143_2519253b-3907-4a04-99f6-fc85b3984548_annotato.doc.docx"))

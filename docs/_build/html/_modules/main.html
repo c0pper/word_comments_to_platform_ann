@@ -1,0 +1,288 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>main &#8212; Word Comments to Platform Annotations 0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for main</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    main.py</span>
+<span class="sd">    -------</span>
+
+<span class="sd">    This module contains the main functions to extract comments and relative text from word files and convert them into</span>
+<span class="sd">    EAI Platform annotations</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">doc_converter</span> <span class="kn">import</span> <span class="n">get_text_from_doc</span><span class="p">,</span> <span class="n">normalize_fucked_encoding</span>
+<span class="kn">import</span> <span class="nn">zipfile</span>
+<span class="kn">from</span> <span class="nn">bs4</span> <span class="kn">import</span> <span class="n">BeautifulSoup</span> <span class="k">as</span> <span class="n">Soup</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
+<span class="kn">from</span> <span class="nn">entities</span> <span class="kn">import</span> <span class="n">extraction</span><span class="p">,</span> <span class="n">taxonomy</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">platform_utils_eai.functions</span> <span class="kn">import</span> <span class="n">create_folder_structure</span><span class="p">,</span> <span class="n">create_libraries_zip</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+
+
+<div class="viewcode-block" id="return_comments_dicts"><a class="viewcode-back" href="../main.html#main.return_comments_dicts">[docs]</a><span class="k">def</span> <span class="nf">return_comments_dicts</span><span class="p">(</span><span class="n">doc_file_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">list</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    In a word file, for every comment in it creates a dict with the text of the comment, the text on which the</span>
+<span class="sd">    comment was placed, the start character of the comment and the end character of the comment. Then returns a list</span>
+<span class="sd">    of dictionaries, one dictionary per comment in the file.</span>
+
+<span class="sd">    :param doc_file_path: path of a single word document (.docx)</span>
+<span class="sd">    :return: list of dictionaries, one for each comment</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">unzip</span> <span class="o">=</span> <span class="n">zipfile</span><span class="o">.</span><span class="n">ZipFile</span><span class="p">(</span><span class="n">doc_file_path</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">comments</span> <span class="o">=</span> <span class="n">Soup</span><span class="p">(</span><span class="n">unzip</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s1">&#39;word/comments.xml&#39;</span><span class="p">),</span> <span class="s1">&#39;lxml&#39;</span><span class="p">)</span>
+        <span class="n">doc</span> <span class="o">=</span> <span class="n">unzip</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s1">&#39;word/document.xml&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span>
+        <span class="n">txt</span> <span class="o">=</span> <span class="n">get_text_from_doc</span><span class="p">(</span><span class="n">doc_file_path</span><span class="p">)</span>
+        <span class="n">txt</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s1">&#39;(S\d+)&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;\n\1&#39;</span><span class="p">,</span> <span class="n">txt</span><span class="p">)</span>  <span class="c1"># newline ogni enunciato</span>
+        <span class="n">txt</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s1">&#39; +&#39;</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="n">txt</span><span class="p">)</span>
+
+        <span class="c1">#  populate comments_dicts list with dicts for every comment</span>
+        <span class="n">start_loc</span> <span class="o">=</span> <span class="p">{</span><span class="n">x</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">):</span> <span class="n">x</span><span class="o">.</span><span class="n">start</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">re</span><span class="o">.</span><span class="n">finditer</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;&lt;w:commentRangeStart.*?w:id=&quot;(.*?)&quot;&#39;</span><span class="p">,</span> <span class="n">doc</span><span class="p">)}</span>
+        <span class="n">end_loc</span> <span class="o">=</span> <span class="p">{</span><span class="n">x</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">):</span> <span class="n">x</span><span class="o">.</span><span class="n">end</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">re</span><span class="o">.</span><span class="n">finditer</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;&lt;w:commentRangeEnd.*?w:id=&quot;(.*?)&quot;.*?&gt;&#39;</span><span class="p">,</span> <span class="n">doc</span><span class="p">)}</span>
+        <span class="n">comments_dicts</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">comments</span><span class="o">.</span><span class="n">find_all</span><span class="p">(</span><span class="s1">&#39;w:comment&#39;</span><span class="p">):</span>
+            <span class="n">c_id</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;w:id&#39;</span><span class="p">]</span>
+            <span class="c1"># Use the locations we found earlier to extract the xml fragment from the document for</span>
+            <span class="c1"># each comment ID, adding spaces to separate any paragraphs in multi-paragraph comments</span>
+            <span class="n">xml</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;(&lt;w:p .*?&gt;)&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;\1 &#39;</span><span class="p">,</span> <span class="n">doc</span><span class="p">[</span><span class="n">start_loc</span><span class="p">[</span><span class="n">c_id</span><span class="p">]:</span><span class="n">end_loc</span><span class="p">[</span><span class="n">c_id</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])</span>
+            <span class="c1"># print(xml+&quot;\n\n&quot;)</span>
+            <span class="n">cmt</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">findAll</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+            <span class="n">cmt</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s1">&#39; +&#39;</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="n">cmt</span><span class="p">)</span>
+            <span class="n">text_reference_soup</span> <span class="o">=</span> <span class="n">Soup</span><span class="p">(</span><span class="n">xml</span><span class="p">,</span> <span class="s1">&#39;lxml&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">findAll</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">text_reference_soup</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">text_reference</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">text_reference_soup</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">text_reference</span> <span class="o">=</span> <span class="n">text_reference_soup</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+            <span class="n">text_reference</span> <span class="o">=</span> <span class="n">normalize_fucked_encoding</span><span class="p">(</span><span class="n">text_reference</span><span class="p">)</span>
+            <span class="n">text_reference</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s1">&#39; +&#39;</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="n">text_reference</span><span class="p">)</span>
+            <span class="n">text_reference</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s1">&#39;(S\d+)&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;\n\1&#39;</span><span class="p">,</span> <span class="n">text_reference</span><span class="p">)</span>
+
+            <span class="n">cmt_and_txt</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;comment&quot;</span><span class="p">:</span> <span class="n">cmt</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;;&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="n">text_reference</span><span class="p">,</span>
+                           <span class="s2">&quot;start&quot;</span><span class="p">:</span> <span class="n">txt</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">text_reference</span><span class="p">),</span> <span class="s2">&quot;end&quot;</span><span class="p">:</span> <span class="n">txt</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">text_reference</span><span class="p">)</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">text_reference</span><span class="p">)}</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">cmt_and_txt</span><span class="p">)</span>
+
+            <span class="n">comments_dicts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cmt_and_txt</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">comments_dicts</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No comments found in </span><span class="si">{</span><span class="n">doc_file_path</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
+
+
+<div class="viewcode-block" id="create_annotation_and_text_file"><a class="viewcode-back" href="../main.html#main.create_annotation_and_text_file">[docs]</a><span class="k">def</span> <span class="nf">create_annotation_and_text_file</span><span class="p">(</span><span class="n">doc_file_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">comments_dicts</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">folders</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">highlight_mode</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    For each comment in comment_dicts create a corresponding annotation and test file in their relative folders</span>
+
+<span class="sd">    :param doc_file_path: path of a single word document (.docx)</span>
+<span class="sd">    :param comments_dicts: list of comment dictionaries generated by :func:&quot;main.return_comments_dicts&quot;</span>
+<span class="sd">    :param folders: folder structure generated by :func:&quot;create_folder_structure&quot;</span>
+<span class="sd">    :param highlight_mode: if true, for every comment in the current file, create an ann file with the annotation for</span>
+<span class="sd">    the text highlighted by the comment. This works better for autoML, else create a single ann file for</span>
+<span class="sd">    the current file with all the annotations for all the comments</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">highlight_mode</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">comments_dicts</span><span class="p">):</span>
+            <span class="n">text_file_name</span> <span class="o">=</span> <span class="n">doc_file_path</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;.txt&quot;</span>
+            <span class="n">ann_file_name</span> <span class="o">=</span> <span class="n">doc_file_path</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;.ann&quot;</span>
+            <span class="k">if</span> <span class="n">c</span><span class="p">[</span><span class="s1">&#39;comment&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="n">taxonomy</span><span class="p">:</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">folders</span><span class="p">[</span><span class="s2">&quot;tax_test_folder&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="n">text_file_name</span><span class="p">),</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+                    <span class="c1"># print(txt)</span>
+                    <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="s1">&#39;text&#39;</span><span class="p">])</span>
+
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">folders</span><span class="p">[</span><span class="s2">&quot;tax_ann_folder&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="n">ann_file_name</span><span class="p">),</span> <span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">ann</span><span class="p">:</span>
+                    <span class="n">tax_count</span> <span class="o">=</span> <span class="mi">1</span>
+                    <span class="c1"># print(&quot;TAX: &quot;, c[&quot;text&quot;])</span>
+                    <span class="n">ann</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;C</span><span class="si">{</span><span class="n">tax_count</span><span class="si">}</span><span class="s2">		</span><span class="si">{</span><span class="n">taxonomy</span><span class="p">[</span><span class="n">c</span><span class="p">[</span><span class="s1">&#39;comment&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()]</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">c</span><span class="p">[</span><span class="s1">&#39;comment&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="n">extraction</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">c</span><span class="p">[</span><span class="s2">&quot;start&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                    <span class="c1"># raise Exception(f&quot;&#39;{c[&#39;text&#39;]}&#39; not found in text ({docfile.split(&#39;.&#39;)[0]})&quot;)</span>
+                    <span class="k">pass</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">folders</span><span class="p">[</span><span class="s2">&quot;xtr_test_folder&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="n">text_file_name</span><span class="p">),</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span>
+                              <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+                        <span class="c1"># print(txt)</span>
+                        <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="s1">&#39;text&#39;</span><span class="p">])</span>
+                    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">folders</span><span class="p">[</span><span class="s2">&quot;xtr_ann_folder&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="n">ann_file_name</span><span class="p">),</span> <span class="s1">&#39;a&#39;</span><span class="p">,</span>
+                              <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">ann</span><span class="p">:</span>
+                        <span class="n">xtr_count</span> <span class="o">=</span> <span class="mi">1</span>
+                        <span class="c1"># print(&quot;XTR: &quot;, c[&quot;text&quot;])</span>
+                        <span class="n">ann</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+                            <span class="sa">f</span><span class="s2">&quot;T</span><span class="si">{</span><span class="n">xtr_count</span><span class="si">}</span><span class="s2">		</span><span class="si">{</span><span class="n">extraction</span><span class="p">[</span><span class="n">c</span><span class="p">[</span><span class="s1">&#39;comment&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()]</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">c</span><span class="p">[</span><span class="s1">&#39;start&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">c</span><span class="p">[</span><span class="s1">&#39;end&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">	</span><span class="si">{</span><span class="n">c</span><span class="p">[</span><span class="s1">&#39;text&#39;</span><span class="p">]</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">highlight_mode</span><span class="p">:</span>
+        <span class="n">tax_count</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">xtr_count</span> <span class="o">=</span> <span class="mi">1</span>
+
+        <span class="n">txt</span> <span class="o">=</span> <span class="n">normalize_fucked_encoding</span><span class="p">(</span><span class="n">get_text_from_doc</span><span class="p">(</span><span class="n">doc_file_path</span><span class="p">))</span>
+        <span class="n">txt</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s1">&#39; +&#39;</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="n">txt</span><span class="p">)</span>
+        <span class="n">txt</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s1">&#39;(S\d+)&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;\n\1&#39;</span><span class="p">,</span> <span class="n">txt</span><span class="p">)</span> <span class="c1"># newline ogni enunciato</span>
+
+        <span class="n">tax_txt_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">folders</span><span class="p">[</span><span class="s2">&quot;tax_test_folder&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">doc_file_path</span><span class="o">.</span><span class="n">with_suffix</span><span class="p">(</span><span class="s2">&quot;.txt&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+        <span class="n">tax_ann_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">folders</span><span class="p">[</span><span class="s2">&quot;tax_ann_folder&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">doc_file_path</span><span class="o">.</span><span class="n">with_suffix</span><span class="p">(</span><span class="s2">&quot;.ann&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+        <span class="n">xtr_txt_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">folders</span><span class="p">[</span><span class="s2">&quot;xtr_test_folder&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">doc_file_path</span><span class="o">.</span><span class="n">with_suffix</span><span class="p">(</span><span class="s2">&quot;.txt&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+        <span class="n">xtr_ann_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">folders</span><span class="p">[</span><span class="s2">&quot;xtr_ann_folder&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">doc_file_path</span><span class="o">.</span><span class="n">with_suffix</span><span class="p">(</span><span class="s2">&quot;.ann&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">comments_dicts</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">c</span><span class="p">[</span><span class="s1">&#39;comment&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="n">taxonomy</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+
+                <span class="c1"># evita di ricreare il file txt tante volte quante sono le annotazioni</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">tax_txt_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">tax_txt_path</span><span class="si">}</span><span class="s2"> not exist, creating it.&quot;</span><span class="p">)</span>
+                    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">tax_txt_path</span><span class="p">,</span> <span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">text_file</span><span class="p">:</span>
+                        <span class="n">text_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">txt</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">tax_txt_path</span><span class="si">}</span><span class="s2"> exist&quot;</span><span class="p">)</span>
+
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">tax_ann_path</span><span class="p">,</span> <span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">ann</span><span class="p">:</span>
+                    <span class="n">ann</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;C</span><span class="si">{</span><span class="n">tax_count</span><span class="si">}</span><span class="s2">		</span><span class="si">{</span><span class="n">taxonomy</span><span class="p">[</span><span class="n">c</span><span class="p">[</span><span class="s1">&#39;comment&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()]</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="n">tax_count</span> <span class="o">+=</span> <span class="mi">1</span>
+
+            <span class="k">if</span> <span class="n">c</span><span class="p">[</span><span class="s1">&#39;comment&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="n">extraction</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">xtr_txt_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">xtr_txt_path</span><span class="si">}</span><span class="s2"> not exist, creating it.&quot;</span><span class="p">)</span>
+                    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">xtr_txt_path</span><span class="p">,</span> <span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">text_file</span><span class="p">:</span>
+                        <span class="n">text_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">txt</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">xtr_txt_path</span><span class="si">}</span><span class="s2"> exist&quot;</span><span class="p">)</span>
+
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">xtr_ann_path</span><span class="p">,</span> <span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">ann</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">c</span><span class="p">[</span><span class="s2">&quot;start&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                        <span class="c1"># raise Exception(f&quot;&#39;{c[&#39;text&#39;]}&#39; not found in text ({docfile.split(&#39;.&#39;)[0]})&quot;)</span>
+                        <span class="k">pass</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">ann</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+                            <span class="sa">f</span><span class="s2">&quot;T</span><span class="si">{</span><span class="n">xtr_count</span><span class="si">}</span><span class="s2">		</span><span class="si">{</span><span class="n">extraction</span><span class="p">[</span><span class="n">c</span><span class="p">[</span><span class="s1">&#39;comment&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()]</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">c</span><span class="p">[</span><span class="s1">&#39;start&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">c</span><span class="p">[</span><span class="s1">&#39;end&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">	</span><span class="si">{</span><span class="n">c</span><span class="p">[</span><span class="s1">&#39;text&#39;</span><span class="p">]</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+                        <span class="n">xtr_count</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Found </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">comments_dicts</span><span class="p">)</span><span class="si">}</span><span class="s2"> annotations&quot;</span><span class="p">)</span></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="c1"># se True, invece che creare un annotazione dell&#39;intero documento, crea un annotazione del segmento di testo commentato</span>
+    <span class="n">highlight_mode</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="n">runs_folder_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">input</span><span class="p">(</span><span class="s1">&#39;input the path where the run output should be stored: &#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">runs_folder_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Path </span><span class="si">{</span><span class="n">runs_folder_path</span><span class="si">}</span><span class="s2"> doesn&#39;t exist&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">now</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%d</span><span class="s1">_%m_%y_%H_%M&#39;</span><span class="p">)</span>
+        <span class="n">folders</span> <span class="o">=</span> <span class="n">create_folder_structure</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">runs_folder_path</span><span class="p">),</span> <span class="n">now</span><span class="p">)</span>
+
+        <span class="n">word_files_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;C:\Users\smarotta\Desktop\mirco_trasc_ann\word_sample&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">word_files_path</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;*.docx&quot;</span><span class="p">)):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;---------</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot;WORKING ON: &quot;</span><span class="p">,</span> <span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="k">if</span> <span class="s2">&quot;_annotato&quot;</span> <span class="ow">in</span> <span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+                <span class="n">file_comments_dicts</span> <span class="o">=</span> <span class="n">return_comments_dicts</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+                <span class="n">create_annotation_and_text_file</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">file_comments_dicts</span><span class="p">,</span> <span class="n">folders</span><span class="p">)</span>
+        <span class="n">create_libraries_zip</span><span class="p">(</span><span class="n">folders</span><span class="p">,</span> <span class="n">now</span><span class="p">)</span>
+
+        <span class="c1"># for root, dirs, files in os.walk(&#39;C:\\Users\\smarotta\\Desktop\\mirco_trasc_ann\\post_21-10-22\\word&#39;):</span>
+        <span class="c1">#     for f in tqdm(files):</span>
+        <span class="c1">#         print(&quot;---------\n&quot; + &quot;WORKING ON: &quot; + os.path.join(root, f))</span>
+        <span class="c1">#         file_comments_dicts = return_comments_dicts(root, f)</span>
+        <span class="c1">#         if &quot;_annotato&quot; in f:</span>
+        <span class="c1">#             if file_comments_dicts:</span>
+        <span class="c1">#                 print(root, f)</span>
+        <span class="c1">#                 create_annotation_and_text_file(root, f, file_comments_dicts)</span>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">Word Comments to Platform Annotations</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../doc_converter.html">doc_converter module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../entities.html">entities module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../main.html">main module</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2023, Simone Martin Marotta.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 6.0.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
