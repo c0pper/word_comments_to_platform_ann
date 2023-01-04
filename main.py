@@ -157,10 +157,7 @@ def create_annotation_and_text_file(doc_file_path: Path, comments_dicts: list, f
     print(f"Found {len(comments_dicts)} annotations")
 
 
-if __name__ == "__main__":
-    # se True, invece che creare un annotazione dell'intero documento, crea un annotazione del segmento di testo commentato
-    highlight_mode = False
-
+def main():
     runs_folder_path = Path(f"{input('input the path where the run output should be stored: ')}")
 
     if not runs_folder_path.exists():
@@ -174,14 +171,18 @@ if __name__ == "__main__":
             print("---------\n" + "WORKING ON: ", f.name)
             if "_annotato" in f.name:
                 file_comments_dicts = return_comments_dicts(f)
-                create_annotation_and_text_file(f, file_comments_dicts, folders)
+                create_annotation_and_text_file(f, file_comments_dicts, folders, highlight_mode=True)
         create_libraries_zip(folders, now)
 
-        # for root, dirs, files in os.walk('C:\\Users\\smarotta\\Desktop\\mirco_trasc_ann\\post_21-10-22\\word'):
-        #     for f in tqdm(files):
-        #         print("---------\n" + "WORKING ON: " + os.path.join(root, f))
-        #         file_comments_dicts = return_comments_dicts(root, f)
-        #         if "_annotato" in f:
-        #             if file_comments_dicts:
-        #                 print(root, f)
-        #                 create_annotation_and_text_file(root, f, file_comments_dicts)
+
+if __name__ == "__main__":
+    main()
+
+    # for root, dirs, files in os.walk('C:\\Users\\smarotta\\Desktop\\mirco_trasc_ann\\post_21-10-22\\word'):
+    #     for f in tqdm(files):
+    #         print("---------\n" + "WORKING ON: " + os.path.join(root, f))
+    #         file_comments_dicts = return_comments_dicts(root, f)
+    #         if "_annotato" in f:
+    #             if file_comments_dicts:
+    #                 print(root, f)
+    #                 create_annotation_and_text_file(root, f, file_comments_dicts)
