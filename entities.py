@@ -1,4 +1,6 @@
 taxonomy = {
+    #  operatore
+    "rispetto script": "rispetto_script",
     "presentazione società": "presentazione_societa",
     "presentazione prodotto": "presentazione_prodotto",
     "dettaglio esposizione": "dettaglio_esposizione",
@@ -7,6 +9,7 @@ taxonomy = {
     "stato attività impresa": "stato_attivita_impresa",
     "scadenza pagamento": "scadenza_pagamento",
     "volontà risolutiva": "volonta_risolutiva",
+    "pagamento acconto": "pagamento_acconto",
     "appuntamento": "appuntamento",
     "bene finanziato": "bene_finanziato",
     "situazione economica": "situazione_economica",
@@ -26,6 +29,7 @@ taxonomy = {
     "tempistiche introiti": "tempistiche_introiti",
     "pagamento effettuato": "pagamento_effettuato",
     "utilizzo leve": "utilizzo_leve",
+    "vantaggio": "vantaggio",
     "conferma accordi": "conferma_accordi",
     "estremi di pagamento": "estremi_di_pagamento",
     "richiesto riscontro di pagamento": "richiesto_riscontro_di_pagamento",
@@ -33,6 +37,7 @@ taxonomy = {
     "richiesta documenti": "richiesta_documenti",
     "invito a confronto diretto": "invito_a_confronto_diretto",
 
+    #  debitore
     "non è a conoscenza del debito": "ignora_debito",
     "maggiori dettagli su debito": "maggiori_dettagli_debito",
     "vuole confronto diretto con mandante": "confronto_diretto_mandante",
@@ -46,6 +51,7 @@ taxonomy = {
     "chiede/rimanda appuntamento": "chiede_rimanda_appuntamento",
     "rimanda appuntamento": "chiede_rimanda_appuntamento",
     "chiede appuntamento": "chiede_rimanda_appuntamento",
+    "data pagamento": "data_pagamento",
     "dettagli su modalità di pagamento": "dettagli_modalita_pagamento",
     "cliente assente": "cliente_assente",
     "reale interlocutore": "reale_interlocutore",
@@ -58,13 +64,12 @@ taxonomy = {
     "proposta agevolazione": "proposta_agevolazione",
     "ha qualcuno che lo può aiutare": "ha_qualcuno_che_puo_aiutare",
     "ha fonti di reddito": "ha_fonti_reddito",
+    "importo sostenibile": "importo_sostenibile",
+    "prospettiva temporale": "prospettiva_temporale",
     "garanzie": "garanzie",
-    "modulistica": "modulistica",
+    "modulistica": "modulistica"
+    # "stato attività impresa": "stato_attivita_impresa"
 }
 
 extraction = {
-    "data pagamento": "data_pagamento",
-    "importo sostenibile": "importo_sostenibile",
-    "prospettiva temporale": "prospettiva_temporale",
-    "stato attività impresa": "stato_attivita_impresa"
 }

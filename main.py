@@ -14,7 +14,7 @@ from tqdm import tqdm
 from entities import extraction, taxonomy
 
 
-def get_txt_paths(txt):
+def get_txt_paths(txt: str):
         txt = normalize_fucked_encoding(txt)
         txt = re.sub(' +', ' ', txt)
         txt = re.sub('(S\d+)', r'\n\1', txt) # newline ogni enunciato
@@ -200,7 +200,7 @@ if __name__ == "__main__":
         os.makedirs(xtr_ann_folder, exist_ok=True)
 
 
-        for root, dirs, files in os.walk('C:\\Users\\smarotta\\Desktop\\trasc_ann\\post_11-07-22'):
+        for root, dirs, files in os.walk('C:\\Users\\smarotta\\Desktop\\mirco_trasc_ann\\post_21-10-22\\word'):
             for f in tqdm(files):
                 print("---------\n" + "WORKING ON: " + os.path.join(root, f))
                 file_comments_dicts = return_comments_dicts(root, f)
