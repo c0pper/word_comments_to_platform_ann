@@ -1,5 +1,0 @@
-cd docs
-sphinx-quickstart
-cd ..
-sphinx-apidoc -o docs .
-cd docs && make clean html && make html
