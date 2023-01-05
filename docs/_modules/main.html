@@ -53,11 +53,11 @@
 <div class="viewcode-block" id="return_comments_dicts"><a class="viewcode-back" href="../main.html#main.return_comments_dicts">[docs]</a><span class="k">def</span> <span class="nf">return_comments_dicts</span><span class="p">(</span><span class="n">doc_file_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">list</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    In a word file, for every comment in it creates a dict with the text of the comment, the text on which the</span>
-<span class="sd">    comment was placed, the start character of the comment and the end character of the comment. Then returns a list</span>
-<span class="sd">    of dictionaries, one dictionary per comment in the file.</span>
+<span class="sd">    comment was placed, the start character of the comment and the end character of the comment. Then returns either a list</span>
+<span class="sd">    of dictionaries (one dictionary per comment in the file), or False if no comment was found in the docx.</span>
 
 <span class="sd">    :param doc_file_path: path of a single word document (.docx)</span>
-<span class="sd">    :return: list of dictionaries, one for each comment</span>
+<span class="sd">    :return: list of dictionaries (one for each comment) or False</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">unzip</span> <span class="o">=</span> <span class="n">zipfile</span><span class="o">.</span><span class="n">ZipFile</span><span class="p">(</span><span class="n">doc_file_path</span><span class="p">)</span>
@@ -80,19 +80,23 @@
             <span class="c1"># print(xml+&quot;\n\n&quot;)</span>
             <span class="n">cmt</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">findAll</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
             <span class="n">cmt</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s1">&#39; +&#39;</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="n">cmt</span><span class="p">)</span>
+            <span class="n">cmt</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">cmt</span><span class="p">)</span>
             <span class="n">text_reference_soup</span> <span class="o">=</span> <span class="n">Soup</span><span class="p">(</span><span class="n">xml</span><span class="p">,</span> <span class="s1">&#39;lxml&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">findAll</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="c1"># print(text_reference_soup)</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">text_reference_soup</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="n">text_reference</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">text_reference_soup</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
+            <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">text_reference_soup</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="n">text_reference</span> <span class="o">=</span> <span class="n">text_reference_soup</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">text_reference</span> <span class="o">=</span> <span class="s2">&quot;text reference not found&quot;</span>
 
             <span class="n">text_reference</span> <span class="o">=</span> <span class="n">normalize_fucked_encoding</span><span class="p">(</span><span class="n">text_reference</span><span class="p">)</span>
             <span class="n">text_reference</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s1">&#39; +&#39;</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="n">text_reference</span><span class="p">)</span>
             <span class="n">text_reference</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s1">&#39;(S\d+)&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;\n\1&#39;</span><span class="p">,</span> <span class="n">text_reference</span><span class="p">)</span>
 
-            <span class="n">cmt_and_txt</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;comment&quot;</span><span class="p">:</span> <span class="n">cmt</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;;&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="n">text_reference</span><span class="p">,</span>
+            <span class="n">cmt_and_txt</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;comment&quot;</span><span class="p">:</span> <span class="n">re</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:|,|;&quot;</span><span class="p">,</span> <span class="n">cmt</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span> <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="n">text_reference</span><span class="p">,</span>
                            <span class="s2">&quot;start&quot;</span><span class="p">:</span> <span class="n">txt</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">text_reference</span><span class="p">),</span> <span class="s2">&quot;end&quot;</span><span class="p">:</span> <span class="n">txt</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">text_reference</span><span class="p">)</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">text_reference</span><span class="p">)}</span>
-            <span class="nb">print</span><span class="p">(</span><span class="n">cmt_and_txt</span><span class="p">)</span>
+            <span class="c1"># print(cmt_and_txt)</span>
 
             <span class="n">comments_dicts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cmt_and_txt</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">comments_dicts</span>
@@ -106,11 +110,9 @@
 <span class="sd">    For each comment in comment_dicts create a corresponding annotation and test file in their relative folders</span>
 
 <span class="sd">    :param doc_file_path: path of a single word document (.docx)</span>
-<span class="sd">    :param comments_dicts: list of comment dictionaries generated by :func:&quot;main.return_comments_dicts&quot;</span>
-<span class="sd">    :param folders: folder structure generated by :func:&quot;create_folder_structure&quot;</span>
-<span class="sd">    :param highlight_mode: if true, for every comment in the current file, create an ann file with the annotation for</span>
-<span class="sd">    the text highlighted by the comment. This works better for autoML, else create a single ann file for</span>
-<span class="sd">    the current file with all the annotations for all the comments</span>
+<span class="sd">    :param comments_dicts: list of comment dictionaries generated by :func:`main.return_comments_dicts`</span>
+<span class="sd">    :param folders: folder structure generated by :func:`platform_utils_eai.functions.create_folder_structure`</span>
+<span class="sd">    :param highlight_mode: if true, for every comment in the current file, create an ann file with the annotation for the text highlighted by the comment. This works better for autoML, else create a single ann file for the current file with all the annotations for all the comments</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">highlight_mode</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">comments_dicts</span><span class="p">):</span>
@@ -189,10 +191,7 @@
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Found </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">comments_dicts</span><span class="p">)</span><span class="si">}</span><span class="s2"> annotations&quot;</span><span class="p">)</span></div>
 
 
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
-    <span class="c1"># se True, invece che creare un annotazione dell&#39;intero documento, crea un annotazione del segmento di testo commentato</span>
-    <span class="n">highlight_mode</span> <span class="o">=</span> <span class="kc">False</span>
-
+<div class="viewcode-block" id="main"><a class="viewcode-back" href="../main.html#main.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
     <span class="n">runs_folder_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">input</span><span class="p">(</span><span class="s1">&#39;input the path where the run output should be stored: &#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">runs_folder_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
@@ -206,17 +205,21 @@
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;---------</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot;WORKING ON: &quot;</span><span class="p">,</span> <span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
             <span class="k">if</span> <span class="s2">&quot;_annotato&quot;</span> <span class="ow">in</span> <span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
                 <span class="n">file_comments_dicts</span> <span class="o">=</span> <span class="n">return_comments_dicts</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
-                <span class="n">create_annotation_and_text_file</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">file_comments_dicts</span><span class="p">,</span> <span class="n">folders</span><span class="p">)</span>
-        <span class="n">create_libraries_zip</span><span class="p">(</span><span class="n">folders</span><span class="p">,</span> <span class="n">now</span><span class="p">)</span>
+                <span class="n">create_annotation_and_text_file</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">file_comments_dicts</span><span class="p">,</span> <span class="n">folders</span><span class="p">,</span> <span class="n">highlight_mode</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">create_libraries_zip</span><span class="p">(</span><span class="n">folders</span><span class="p">,</span> <span class="n">now</span><span class="p">)</span></div>
 
-        <span class="c1"># for root, dirs, files in os.walk(&#39;C:\\Users\\smarotta\\Desktop\\mirco_trasc_ann\\post_21-10-22\\word&#39;):</span>
-        <span class="c1">#     for f in tqdm(files):</span>
-        <span class="c1">#         print(&quot;---------\n&quot; + &quot;WORKING ON: &quot; + os.path.join(root, f))</span>
-        <span class="c1">#         file_comments_dicts = return_comments_dicts(root, f)</span>
-        <span class="c1">#         if &quot;_annotato&quot; in f:</span>
-        <span class="c1">#             if file_comments_dicts:</span>
-        <span class="c1">#                 print(root, f)</span>
-        <span class="c1">#                 create_annotation_and_text_file(root, f, file_comments_dicts)</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+
+    <span class="c1"># for root, dirs, files in os.walk(&#39;C:\\Users\\smarotta\\Desktop\\mirco_trasc_ann\\post_21-10-22\\word&#39;):</span>
+    <span class="c1">#     for f in tqdm(files):</span>
+    <span class="c1">#         print(&quot;---------\n&quot; + &quot;WORKING ON: &quot; + os.path.join(root, f))</span>
+    <span class="c1">#         file_comments_dicts = return_comments_dicts(root, f)</span>
+    <span class="c1">#         if &quot;_annotato&quot; in f:</span>
+    <span class="c1">#             if file_comments_dicts:</span>
+    <span class="c1">#                 print(root, f)</span>
+    <span class="c1">#                 create_annotation_and_text_file(root, f, file_comments_dicts)</span>
 </pre></div>
 
           </div>

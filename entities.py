@@ -4,7 +4,7 @@
 
     This module contains dictionaries for taxonomy and extraction entites where key is the text found in the word
     comments and value is the name of the entity in the linguistic project. Provides a mapping to be used by
-    :func: "main.create_annotation_and_text_file"
+    :func:`main.create_annotation_and_text_file`
 """
 
 taxonomy = {
