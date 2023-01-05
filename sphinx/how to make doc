@@ -8,3 +8,12 @@ host on github
 https://www.youtube.com/watch?v=zSZpCrwgVOM
 copy _build/html content to docs folder
 add empty .nojekyll file to docs folder
+
+add theme
+https://sphinx-themes.org/sample-sites/sphinx-rtd-theme/
+
+pip install sphinx-rtd-theme
+Set the following in your existing Sphinx documentation’s conf.py file:
+
+html_theme = 'sphinx_rtd_theme'
+Build your Sphinx documentation with the new theme!
