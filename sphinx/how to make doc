@@ -2,7 +2,7 @@ cd sphinx
 sphinx-quickstart
 cd ..
 sphinx-apidoc -o sphinx .
-cd sphinx && make clean html && make html
+cd sphinx && make clean html && make html & cd ..
 
 host on github
 https://www.youtube.com/watch?v=zSZpCrwgVOM

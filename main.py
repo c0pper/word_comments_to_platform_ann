@@ -168,7 +168,7 @@ def main():
         now = datetime.now().strftime('%d_%m_%y_%H_%M')
         folders = create_folder_structure(str(runs_folder_path), now)
 
-        word_files_path = Path(r"C:\Users\smarotta\Desktop\mirco_trasc_ann\word_sample")
+        word_files_path = Path(f"{input('input the path where the docx files are: ')}")
         for f in tqdm(word_files_path.glob("*.docx")):
             print("---------\n" + "WORKING ON: ", f.name)
             if "_annotato" in f.name:
@@ -179,12 +179,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-    # for root, dirs, files in os.walk('C:\\Users\\smarotta\\Desktop\\mirco_trasc_ann\\post_21-10-22\\word'):
-    #     for f in tqdm(files):
-    #         print("---------\n" + "WORKING ON: " + os.path.join(root, f))
-    #         file_comments_dicts = return_comments_dicts(root, f)
-    #         if "_annotato" in f:
-    #             if file_comments_dicts:
-    #                 print(root, f)
-    #                 create_annotation_and_text_file(root, f, file_comments_dicts)
