@@ -16,6 +16,8 @@ from entities import extraction, taxonomy
 from typing import Union
 from platform_utils_eai.functions import create_folder_structure, create_libraries_zip
 from pathlib import Path
+import splitfolders
+import shutil
 
 
 def return_comments_dicts(doc_file_path: Path) -> Union[list, bool]:
@@ -73,7 +75,8 @@ def return_comments_dicts(doc_file_path: Path) -> Union[list, bool]:
         return False
 
 
-def create_annotation_and_text_file(doc_file_path: Path, comments_dicts: list, folders: dict, highlight_mode: bool = True):
+def create_annotation_and_text_file(doc_file_path: Path, comments_dicts: list, folders: dict,
+                                    highlight_mode: bool = True):
     """
     For each comment in comment_dicts create a corresponding annotation and test file in their relative folders
 
@@ -87,30 +90,42 @@ def create_annotation_and_text_file(doc_file_path: Path, comments_dicts: list, f
             text_file_name = doc_file_path.name + "_" + str(idx) + ".txt"
             ann_file_name = doc_file_path.name + "_" + str(idx) + ".ann"
             if c['comment'].lower() in taxonomy:
-                with open(Path(folders["tax_test_folder"] + "/" + text_file_name), 'w', encoding="utf-8") as file:
+                category = taxonomy[c['comment'].lower()]
+                tax_test_category_folder = Path(folders["tax_test_folder"] / category)
+                tax_test_category_folder.mkdir(exist_ok=True, parents=True)
+                tax_ann_category_folder = Path(folders["tax_ann_folder"] / category)
+                tax_ann_category_folder.mkdir(exist_ok=True, parents=True)
+
+                with open(Path(tax_test_category_folder / text_file_name), 'w', encoding="utf-8") as file:
                     # print(txt)
                     file.write(c['text'])
 
-                with open(Path(folders["tax_ann_folder"] + "/" + ann_file_name), 'a', encoding="utf-8") as ann:
+                with open(Path(tax_ann_category_folder / ann_file_name), 'a', encoding="utf-8") as ann:
                     tax_count = 1
                     # print("TAX: ", c["text"])
-                    ann.write(f"C{tax_count}		{taxonomy[c['comment'].lower()]}\n")
+                    ann.write(f"C{tax_count}		{category}\n")
 
             if c['comment'].lower() in extraction:
+                category = extraction[c['comment'].lower()]
+                xtr_test_category_folder = Path(folders["xtr_test_folder"] / category)
+                xtr_test_category_folder.mkdir(exist_ok=True, parents=True)
+                xtr_ann_category_folder = Path(folders["xtr_ann_folder"] / category)
+                xtr_ann_category_folder.mkdir(exist_ok=True, parents=True)
+
                 if c["start"] == -1:
                     # raise Exception(f"'{c['text']}' not found in text ({docfile.split('.')[0]})")
                     pass
                 else:
-                    with open(Path(folders["xtr_test_folder"] + "/" + text_file_name), 'w',
+                    with open(Path(xtr_test_category_folder / text_file_name), 'w',
                               encoding="utf-8") as file:
                         # print(txt)
                         file.write(c['text'])
-                    with open(Path(folders["xtr_ann_folder"] + "/" + ann_file_name), 'a',
+                    with open(Path(xtr_ann_category_folder / ann_file_name), 'a',
                               encoding="utf-8") as ann:
                         xtr_count = 1
                         # print("XTR: ", c["text"])
                         ann.write(
-                            f"T{xtr_count}		{extraction[c['comment'].lower()]} {c['start']} {c['end']}	{c['text']}\n")
+                            f"T{xtr_count}		{category} {c['start']} {c['end']}	{c['text']}\n")
 
     if not highlight_mode:
         tax_count = 1
@@ -118,7 +133,7 @@ def create_annotation_and_text_file(doc_file_path: Path, comments_dicts: list, f
 
         txt = normalize_fucked_encoding(get_text_from_doc(doc_file_path))
         txt = re.sub(' +', ' ', txt)
-        txt = re.sub('(S\d+)', r'\n\1', txt) # newline ogni enunciato
+        txt = re.sub('(S\d+)', r'\n\1', txt)  # newline ogni enunciato
 
         tax_txt_path = Path(folders["tax_test_folder"] + "/" + str(doc_file_path.with_suffix(".txt").name))
         tax_ann_path = Path(folders["tax_ann_folder"] + "/" + str(doc_file_path.with_suffix(".ann").name))
@@ -160,21 +175,37 @@ def create_annotation_and_text_file(doc_file_path: Path, comments_dicts: list, f
 
 
 def main():
-    runs_folder_path = Path(f"{input('input the path where the run output should be stored: ')}")
+    word_files_path = Path(f"{input('input the path where the docx files are: ')}")
 
-    if not runs_folder_path.exists():
-        raise Exception(f"Path {runs_folder_path} doesn't exist")
+    if not word_files_path.exists():
+        raise Exception(f"Path {word_files_path} doesn't exist")
     else:
-        now = datetime.now().strftime('%d_%m_%y_%H_%M')
-        folders = create_folder_structure(str(runs_folder_path), now)
+        folders = create_folder_structure(str(word_files_path))
 
-        word_files_path = Path(f"{input('input the path where the docx files are: ')}")
         for f in tqdm(word_files_path.glob("*.docx")):
             print("---------\n" + "WORKING ON: ", f.name)
             if "_annotato" in f.name:
                 file_comments_dicts = return_comments_dicts(f)
-                create_annotation_and_text_file(f, file_comments_dicts, folders, highlight_mode=True)
-        create_libraries_zip(folders, now)
+                if file_comments_dicts:  # if comments where found
+                    create_annotation_and_text_file(f, file_comments_dicts, folders, highlight_mode=True)
+
+        is_empty = not any(folders["tax_ann_folder"].iterdir())
+        if not is_empty:
+            splitfolders.ratio(folders["tax_ann_folder"], output=Path(folders["tax_ann_split_folder"]),
+                           seed=1337, ratio=(.8, .2), move=True)
+            splitfolders.ratio(folders["tax_test_folder"], output=Path(folders["tax_test_split_folder"]),
+                           seed=1337, ratio=(.8, .2), move=True)
+            shutil.rmtree(folders["tax_ann_folder"])
+            shutil.rmtree(folders["tax_test_folder"])
+        is_empty = not any(folders["xtr_ann_folder"].iterdir())
+        if not is_empty:
+            splitfolders.ratio(folders["xtr_ann_folder"], output=Path(folders["xtr_ann_split_folder"]),
+                               seed=1337, ratio=(.8, .2), move=True)
+            splitfolders.ratio(folders["xtr_test_folder"], output=Path(folders["xtr_test_split_folder"]),
+                           seed=1337, ratio=(.8, .2), move=True)
+            shutil.rmtree(folders["xtr_ann_folder"])
+            shutil.rmtree(folders["xtr_test_folder"])
+        create_libraries_zip(folders, folders["timenow"])
 
 
 if __name__ == "__main__":
