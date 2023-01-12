@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>intellij_library_creator &mdash; Word Comments to Platform Annotations 0.1 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> Word Comments to Platform Annotations
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../doc_converter.html">doc_converter module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../entities.html">entities module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intellij_library_creator.html">intellij_library_creator module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../main.html">main module</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Word Comments to Platform Annotations</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Module code</a></li>
+      <li class="breadcrumb-item active">intellij_library_creator</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for intellij_library_creator</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">A differenza di Platform, intelliJ considera tutte le annotazioni nei file e non solo quelle riportate nella tassonomia.</span>
+<span class="sd">Per questo è necessario dividere train_lib e val_lib in *_lib_debitore e *_lib_operatore. le librerie conterranno solo</span>
+<span class="sd">i file annotati rispettivamente con entità assegnate a operatore o debitore, cosi da essere caricate nei relativi</span>
+<span class="sd">progetti. Alla fine avremo 4 librerie, 2 per progetto: op_train_lib, op_val_lib, deb_train_lib, deb_val_lib.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
+<span class="kn">from</span> <span class="nn">entities</span> <span class="kn">import</span> <span class="n">operatore_entities</span><span class="p">,</span> <span class="n">debitore_entities</span>
+<span class="kn">import</span> <span class="nn">shutil</span>
+
+
+<div class="viewcode-block" id="get_valid_dirs"><a class="viewcode-back" href="../intellij_library_creator.html#intellij_library_creator.get_valid_dirs">[docs]</a><span class="k">def</span> <span class="nf">get_valid_dirs</span><span class="p">(</span><span class="n">root</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">categories</span><span class="p">:</span> <span class="nb">list</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    :param root: root of the run folder</span>
+<span class="sd">    :param categories: example - debitore_entities.values()</span>
+<span class="sd">    :return: dizionario con percorsi alle categorie filtrate a seconad di deb o op per tax e xtr</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">run_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
+
+    <span class="n">valid_dirs</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">for</span> <span class="n">directory</span> <span class="ow">in</span> <span class="n">run_path</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;*&quot;</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">WORKING IN </span><span class="si">{</span><span class="n">directory</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="c1"># ann_train = Path(directory / &quot;ann_split&quot; / &quot;train&quot;).glob(&quot;**/*.ann&quot;)</span>
+        <span class="c1"># test_train = Path(directory / &quot;test_split&quot; / &quot;train&quot;).glob(&quot;**/*.txt&quot;)</span>
+        <span class="c1"># ann_val = Path(directory / &quot;ann_split&quot; / &quot;val&quot;).glob(&quot;**/*.ann&quot;)</span>
+        <span class="c1"># test_val = Path(directory / &quot;test_split&quot; / &quot;val&quot;).glob(&quot;**/*.txt&quot;)</span>
+        <span class="c1"># print(directory.name, len(list(ann_train)), len(list(test_train)))</span>
+        <span class="c1"># print(directory.name, len(list(ann_val)), len(list(test_val)))</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;ann_split&quot;</span><span class="p">,</span> <span class="s2">&quot;test_split&quot;</span><span class="p">]:</span>
+            <span class="nb">print</span><span class="p">([</span><span class="n">i</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">directory</span> <span class="o">/</span> <span class="n">i</span> <span class="o">/</span> <span class="s2">&quot;train&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;*&quot;</span><span class="p">))</span> <span class="k">if</span> <span class="n">i</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">categories</span><span class="p">])</span>
+            <span class="k">for</span> <span class="n">split</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;train&quot;</span><span class="p">,</span> <span class="s2">&quot;val&quot;</span><span class="p">]:</span>
+                <span class="n">valid_dirs</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">directory</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">split</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">cat_dir</span> <span class="ow">in</span> <span class="n">Path</span><span class="p">(</span><span class="n">directory</span> <span class="o">/</span> <span class="n">i</span> <span class="o">/</span> <span class="n">split</span><span class="p">)</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;*&quot;</span><span class="p">):</span>
+                    <span class="n">cat_name</span> <span class="o">=</span> <span class="n">cat_dir</span><span class="o">.</span><span class="n">name</span>
+                    <span class="k">if</span> <span class="n">cat_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">categories</span><span class="p">:</span>
+                        <span class="k">pass</span>
+                    <span class="k">elif</span> <span class="n">cat_name</span> <span class="ow">in</span> <span class="n">categories</span><span class="p">:</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="n">cat_dir</span><span class="p">)</span>
+                        <span class="n">valid_dirs</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">directory</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">split</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cat_dir</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">valid_dirs</span></div>
+
+
+<div class="viewcode-block" id="get_file_list"><a class="viewcode-back" href="../intellij_library_creator.html#intellij_library_creator.get_file_list">[docs]</a><span class="k">def</span> <span class="nf">get_file_list</span><span class="p">(</span><span class="n">dirs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    :param dirs: dictionary returned by :func:`get_valid_dirs`</span>
+<span class="sd">    :return: dictionary containing list of files for tax_ann_split_train, tax_ann_split_val, tax_test_split_train, tax_test_split_val, xtr_ann_split_train, xtr_ann_split_val, xtr_test_split_train, xtr_test_split_val</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">files</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">dir_list</span> <span class="ow">in</span> <span class="n">dirs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">files</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">dir_list</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">dir_list</span><span class="p">:</span>
+                <span class="n">files</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">files</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;*&quot;</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">files</span></div>
+
+
+<div class="viewcode-block" id="copy_files"><a class="viewcode-back" href="../intellij_library_creator.html#intellij_library_creator.copy_files">[docs]</a><span class="k">def</span> <span class="nf">copy_files</span><span class="p">(</span><span class="n">root</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">files</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Copy files to the intellij_lib folder inside the run root folder</span>
+
+<span class="sd">    :param root: root of the run folder</span>
+<span class="sd">    :param files: dict returned by :func:`get_file_list`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">root</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">list_of_files</span> <span class="ow">in</span> <span class="n">files</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">list_of_files</span><span class="p">:</span>
+            <span class="n">dest</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">&quot;intellij_lib&quot;</span> <span class="o">/</span> <span class="n">k</span><span class="p">)</span>
+            <span class="n">dest</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">shutil</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">dest</span><span class="p">)</span></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">root</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s2">&quot;Enter run root path: &quot;</span><span class="p">)</span>
+    <span class="n">deb_dirs</span> <span class="o">=</span> <span class="n">get_valid_dirs</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">debitore_entities</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+    <span class="n">op_dirs</span> <span class="o">=</span> <span class="n">get_valid_dirs</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">operatore_entities</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+
+    <span class="n">copy_files</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">get_file_list</span><span class="p">(</span><span class="n">deb_dirs</span><span class="p">))</span>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Simone Martin Marotta.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

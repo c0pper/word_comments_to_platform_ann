@@ -6,4 +6,5 @@ word_comments_to_platform_ann
 
    doc_converter
    entities
+   intellij_library_creator
    main

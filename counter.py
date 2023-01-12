@@ -6,29 +6,28 @@ from entities import operatore_entities, debitore_entities
 import matplotlib.pyplot as plt
 import numpy as np
 
-# word_files_path = Path(f"{input('input the path where the docx files are: ')}")
-#
-# op = 0
-# deb = 0
-# if not word_files_path.exists():
-#     raise Exception(f"Path {word_files_path} doesn't exist")
-# else:
-#     folders = create_folder_structure(str(word_files_path))
-#     docs_tot = len(word_files_path.glob("*.docx"))
-#
-#     for f in tqdm(word_files_path.glob("*.docx")):
-#         # print("---------\n" + "WORKING ON: ", f.name)
-#         if "_annotato" in f.name:
-#             file_comments_dicts = return_comments_dicts(f)
-#             if file_comments_dicts:  # if comments where found
-#                 for d in file_comments_dicts:
-#                     ann = d['comment'].lower()
-#                     if ann in debitore_entities.keys():
-#                         deb += 1
-#                         # print(deb)
-#                     elif ann in operatore_entities.keys():
-#                         op += 1
-#                         # print(op)
+word_files_path = Path(f"{input('input the path where the docx files are: ')}")
+
+op = 0
+deb = 0
+if not word_files_path.exists():
+    raise Exception(f"Path {word_files_path} doesn't exist")
+else:
+    docs_tot = len(list(word_files_path.glob("*.docx")))
+
+    for f in tqdm(word_files_path.glob("*.docx")):
+        # print("---------\n" + "WORKING ON: ", f.name)
+        if "_annotato" in f.name:
+            file_comments_dicts = return_comments_dicts(f)
+            if file_comments_dicts:  # if comments where found
+                for d in file_comments_dicts:
+                    ann = d['comment'].lower()
+                    if ann in debitore_entities.keys():
+                        deb += 1
+                        # print(deb)
+                    elif ann in operatore_entities.keys():
+                        op += 1
+                        # print(op)
 # op_train = int(op*80/100)
 # op_val = op - op_train
 # deb_train = int(deb*80/100)
