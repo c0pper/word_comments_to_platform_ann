@@ -1,4 +1,4 @@
-<mxfile host="app.diagrams.net" modified="2023-01-25T12:29:47.471Z" agent="5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36" etag="PmOAgS6ggh26X-1H2ctm" version="20.6.2" type="github">
+<mxfile host="app.diagrams.net" modified="2023-01-25T12:53:26.765Z" agent="5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36" etag="fzPiqEgDfe7MGqG88pGs" version="20.6.2" type="github">
   <diagram id="C5RBs43oDa-KdzZeNtuy" name="Page-1">
     <mxGraphModel dx="1422" dy="772" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
@@ -67,9 +67,6 @@
           <mxGeometry x="319" y="37.10000000000002" width="70" height="75.8" as="geometry" />
         </mxCell>
         <mxCell id="XQuHplglNApcFHOVQP9D-86" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;" edge="1" parent="XQuHplglNApcFHOVQP9D-75" source="XQuHplglNApcFHOVQP9D-87" target="XQuHplglNApcFHOVQP9D-88">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="XQuHplglNApcFHOVQP9D-114" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="XQuHplglNApcFHOVQP9D-75" source="XQuHplglNApcFHOVQP9D-107" target="XQuHplglNApcFHOVQP9D-110">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="XQuHplglNApcFHOVQP9D-107" value="lista categorie &lt;br&gt;relative a operatore" style="sketch=0;html=1;aspect=fixed;strokeColor=none;shadow=0;align=center;verticalAlign=top;fillColor=#3B8DF1;shape=mxgraph.gcp2.view_list;labelPosition=center;verticalLabelPosition=bottom;" vertex="1" parent="XQuHplglNApcFHOVQP9D-75">
