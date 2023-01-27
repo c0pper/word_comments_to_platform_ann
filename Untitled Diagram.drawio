@@ -1,14 +1,14 @@
-<mxfile host="app.diagrams.net" modified="2023-01-27T12:20:59.127Z" agent="5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36" etag="1t-v-1c9bvy1WD_62HUl" version="20.8.11" type="github">
+<mxfile host="app.diagrams.net" modified="2023-01-27T12:25:35.884Z" agent="5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36" etag="bP44f4bvV5A6Eblj5ed8" version="20.8.11" type="github">
   <diagram id="C5RBs43oDa-KdzZeNtuy" name="Page-1">
     <mxGraphModel dx="1434" dy="774" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="WIyWlLk6GJQsqaUBKTNV-0" />
         <mxCell id="WIyWlLk6GJQsqaUBKTNV-1" parent="WIyWlLk6GJQsqaUBKTNV-0" />
         <mxCell id="XQuHplglNApcFHOVQP9D-73" value="Trascrizione completa telefonata" style="swimlane;childLayout=stackLayout;resizeParent=1;resizeParentMax=0;horizontal=0;startSize=20;horizontalStack=0;html=1;" parent="WIyWlLk6GJQsqaUBKTNV-1" vertex="1">
-          <mxGeometry x="30" y="230" width="890" height="590" as="geometry" />
+          <mxGeometry x="30" y="230" width="1120" height="590" as="geometry" />
         </mxCell>
         <mxCell id="XQuHplglNApcFHOVQP9D-74" value="Enunciato debitore" style="swimlane;startSize=20;horizontal=0;html=1;" parent="XQuHplglNApcFHOVQP9D-73" vertex="1">
-          <mxGeometry x="20" width="870" height="300" as="geometry" />
+          <mxGeometry x="20" width="1100" height="300" as="geometry" />
         </mxCell>
         <mxCell id="XQuHplglNApcFHOVQP9D-81" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="XQuHplglNApcFHOVQP9D-74" source="XQuHplglNApcFHOVQP9D-77" target="XQuHplglNApcFHOVQP9D-80" edge="1">
           <mxGeometry relative="1" as="geometry" />
@@ -39,25 +39,31 @@
         <mxCell id="XQuHplglNApcFHOVQP9D-93" value="lista categorie MANUALI&lt;br&gt;relative a debitore" style="sketch=0;html=1;aspect=fixed;strokeColor=none;shadow=0;align=center;verticalAlign=top;fillColor=#3B8DF1;shape=mxgraph.gcp2.view_list;labelPosition=center;verticalLabelPosition=bottom;" parent="XQuHplglNApcFHOVQP9D-74" vertex="1">
           <mxGeometry x="440" y="170" width="64.8" height="80" as="geometry" />
         </mxCell>
-        <mxCell id="XQuHplglNApcFHOVQP9D-92" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" parent="XQuHplglNApcFHOVQP9D-74" source="XQuHplglNApcFHOVQP9D-93" target="h_Pjg7v3YA9R5ozHN4wc-2" edge="1">
+        <mxCell id="XQuHplglNApcFHOVQP9D-92" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;entryPerimeter=0;" parent="XQuHplglNApcFHOVQP9D-74" source="XQuHplglNApcFHOVQP9D-93" target="h_Pjg7v3YA9R5ozHN4wc-22" edge="1">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="592" y="124.90000000000009" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="XQuHplglNApcFHOVQP9D-105" value="precision / recall&lt;br&gt;categorie debitore" style="shape=image;html=1;verticalAlign=top;verticalLabelPosition=bottom;labelBackgroundColor=#ffffff;imageAspect=0;aspect=fixed;image=https://cdn4.iconfinder.com/data/icons/online-marketing-hand-drawn-vol-2/52/graph__information__online__bars__web__chart__pie-128.png" parent="XQuHplglNApcFHOVQP9D-74" vertex="1">
-          <mxGeometry x="750" y="52.9" width="81.1" height="81.1" as="geometry" />
+          <mxGeometry x="840" y="52.45" width="81.1" height="81.1" as="geometry" />
         </mxCell>
         <mxCell id="XQuHplglNApcFHOVQP9D-103" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;startArrow=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" parent="XQuHplglNApcFHOVQP9D-74" source="h_Pjg7v3YA9R5ozHN4wc-2" target="XQuHplglNApcFHOVQP9D-105" edge="1">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="920" y="74" as="targetPoint" />
-            <mxPoint x="700" y="90" as="sourcePoint" />
+            <mxPoint x="1010" y="73.55" as="targetPoint" />
+            <mxPoint x="790" y="89.55" as="sourcePoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="h_Pjg7v3YA9R5ozHN4wc-2" value="formula precision / recall" style="shape=image;imageAspect=0;aspect=fixed;verticalLabelPosition=top;verticalAlign=bottom;image=https://i0.wp.com/neptune.ai/wp-content/uploads/2022/10/Recommender-Systems-ML-Metrics-vs-Business-Metrics_25-1.png?resize=623%2C263&amp;ssl=1;imageBorder=default;clipPath=inset(0% 59.33% 36.61% 3.67%);labelPosition=center;align=center;" vertex="1" parent="XQuHplglNApcFHOVQP9D-74">
-          <mxGeometry x="560" y="43.44999999999999" width="137.89" height="100" as="geometry" />
+          <mxGeometry x="650" y="42.99999999999999" width="137.89" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="h_Pjg7v3YA9R5ozHN4wc-23" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="XQuHplglNApcFHOVQP9D-74" source="h_Pjg7v3YA9R5ozHN4wc-22" target="h_Pjg7v3YA9R5ozHN4wc-2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="h_Pjg7v3YA9R5ozHN4wc-22" value="numero di&lt;br&gt;TP/FP/FN" style="sketch=0;aspect=fixed;pointerEvents=1;shadow=0;dashed=0;html=1;strokeColor=none;labelPosition=center;verticalLabelPosition=top;verticalAlign=bottom;align=center;fillColor=#00188D;shape=mxgraph.mscae.enterprise.document" vertex="1" parent="XQuHplglNApcFHOVQP9D-74">
+          <mxGeometry x="560" y="68" width="40" height="50" as="geometry" />
         </mxCell>
         <mxCell id="XQuHplglNApcFHOVQP9D-75" value="Enunciato oepratore" style="swimlane;startSize=20;horizontal=0;html=1;" parent="XQuHplglNApcFHOVQP9D-73" vertex="1">
-          <mxGeometry x="20" y="300" width="870" height="290" as="geometry" />
+          <mxGeometry x="20" y="300" width="1100" height="290" as="geometry" />
         </mxCell>
         <mxCell id="XQuHplglNApcFHOVQP9D-85" value="testo operatore" style="html=1;verticalLabelPosition=bottom;align=center;labelBackgroundColor=#ffffff;verticalAlign=top;strokeWidth=2;strokeColor=#0080F0;shadow=0;dashed=0;shape=mxgraph.ios7.icons.documents;" parent="XQuHplglNApcFHOVQP9D-75" vertex="1">
           <mxGeometry x="60" y="60" width="22.5" height="30" as="geometry" />
@@ -77,26 +83,17 @@
         <mxCell id="XQuHplglNApcFHOVQP9D-107" value="lista categorie &lt;br&gt;relative a operatore" style="sketch=0;html=1;aspect=fixed;strokeColor=none;shadow=0;align=center;verticalAlign=top;fillColor=#3B8DF1;shape=mxgraph.gcp2.view_list;labelPosition=center;verticalLabelPosition=bottom;" parent="XQuHplglNApcFHOVQP9D-75" vertex="1">
           <mxGeometry x="440" y="32.9" width="64.8" height="80" as="geometry" />
         </mxCell>
-        <mxCell id="XQuHplglNApcFHOVQP9D-109" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="XQuHplglNApcFHOVQP9D-75" source="XQuHplglNApcFHOVQP9D-107" target="h_Pjg7v3YA9R5ozHN4wc-5" edge="1">
+        <mxCell id="XQuHplglNApcFHOVQP9D-109" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;" parent="XQuHplglNApcFHOVQP9D-75" source="XQuHplglNApcFHOVQP9D-107" target="h_Pjg7v3YA9R5ozHN4wc-28" edge="1">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="560" y="72.90000000000009" as="targetPoint" />
+            <mxPoint x="560" y="72.34999999999991" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="XQuHplglNApcFHOVQP9D-110" value="lista categorie MANUALI&lt;br&gt;relative a operatore" style="sketch=0;html=1;aspect=fixed;strokeColor=none;shadow=0;align=center;verticalAlign=top;fillColor=#3B8DF1;shape=mxgraph.gcp2.view_list;labelPosition=center;verticalLabelPosition=bottom;" parent="XQuHplglNApcFHOVQP9D-75" vertex="1">
           <mxGeometry x="440" y="160.00000000000003" width="64.8" height="80" as="geometry" />
         </mxCell>
-        <mxCell id="XQuHplglNApcFHOVQP9D-111" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" parent="XQuHplglNApcFHOVQP9D-75" source="XQuHplglNApcFHOVQP9D-110" target="h_Pjg7v3YA9R5ozHN4wc-5" edge="1">
+        <mxCell id="XQuHplglNApcFHOVQP9D-111" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;entryPerimeter=0;" parent="XQuHplglNApcFHOVQP9D-75" source="XQuHplglNApcFHOVQP9D-110" target="h_Pjg7v3YA9R5ozHN4wc-28" edge="1">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="592" y="104.90000000000009" as="targetPoint" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="XQuHplglNApcFHOVQP9D-112" value="precision / recall&lt;br&gt;categorie&amp;nbsp;&lt;span style=&quot;background-color: rgb(248, 249, 250);&quot;&gt;operatore&lt;/span&gt;" style="shape=image;html=1;verticalAlign=top;verticalLabelPosition=bottom;labelBackgroundColor=#ffffff;imageAspect=0;aspect=fixed;image=https://cdn4.iconfinder.com/data/icons/online-marketing-hand-drawn-vol-2/52/graph__information__online__bars__web__chart__pie-128.png" parent="XQuHplglNApcFHOVQP9D-75" vertex="1">
-          <mxGeometry x="760" y="31.8" width="81.1" height="81.1" as="geometry" />
-        </mxCell>
-        <mxCell id="XQuHplglNApcFHOVQP9D-113" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;startArrow=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" parent="XQuHplglNApcFHOVQP9D-75" source="h_Pjg7v3YA9R5ozHN4wc-5" target="XQuHplglNApcFHOVQP9D-112" edge="1">
-          <mxGeometry relative="1" as="geometry">
-            <mxPoint x="890" y="-178.89999999999998" as="targetPoint" />
-            <mxPoint x="700" y="72" as="sourcePoint" />
+            <mxPoint x="628.9450000000002" y="122.34999999999991" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="XQuHplglNApcFHOVQP9D-106" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.015;entryY=0.538;entryDx=0;entryDy=0;entryPerimeter=0;" parent="XQuHplglNApcFHOVQP9D-75" source="XQuHplglNApcFHOVQP9D-88" target="XQuHplglNApcFHOVQP9D-107" edge="1">
@@ -104,8 +101,23 @@
             <mxPoint x="420" y="72.10000000000002" as="sourcePoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="h_Pjg7v3YA9R5ozHN4wc-5" value="formula precision / recall" style="shape=image;imageAspect=0;aspect=fixed;verticalLabelPosition=top;verticalAlign=bottom;image=https://i0.wp.com/neptune.ai/wp-content/uploads/2022/10/Recommender-Systems-ML-Metrics-vs-Business-Metrics_25-1.png?resize=623%2C263&amp;ssl=1;imageBorder=default;clipPath=inset(0% 59.33% 36.61% 3.67%);labelPosition=center;align=center;" vertex="1" parent="XQuHplglNApcFHOVQP9D-75">
-          <mxGeometry x="560" y="22.34999999999991" width="137.89" height="100" as="geometry" />
+        <mxCell id="h_Pjg7v3YA9R5ozHN4wc-24" value="precision / recall&lt;br&gt;categorie debitore" style="shape=image;html=1;verticalAlign=top;verticalLabelPosition=bottom;labelBackgroundColor=#ffffff;imageAspect=0;aspect=fixed;image=https://cdn4.iconfinder.com/data/icons/online-marketing-hand-drawn-vol-2/52/graph__information__online__bars__web__chart__pie-128.png" vertex="1" parent="XQuHplglNApcFHOVQP9D-75">
+          <mxGeometry x="850" y="32.35000000000002" width="81.1" height="81.1" as="geometry" />
+        </mxCell>
+        <mxCell id="h_Pjg7v3YA9R5ozHN4wc-25" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;startArrow=none;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="XQuHplglNApcFHOVQP9D-75" source="h_Pjg7v3YA9R5ozHN4wc-26" target="h_Pjg7v3YA9R5ozHN4wc-24">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="970" y="-176.55000000000007" as="targetPoint" />
+            <mxPoint x="750" y="-160.55000000000007" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="h_Pjg7v3YA9R5ozHN4wc-26" value="formula precision / recall" style="shape=image;imageAspect=0;aspect=fixed;verticalLabelPosition=top;verticalAlign=bottom;image=https://i0.wp.com/neptune.ai/wp-content/uploads/2022/10/Recommender-Systems-ML-Metrics-vs-Business-Metrics_25-1.png?resize=623%2C263&amp;ssl=1;imageBorder=default;clipPath=inset(0% 59.33% 36.61% 3.67%);labelPosition=center;align=center;" vertex="1" parent="XQuHplglNApcFHOVQP9D-75">
+          <mxGeometry x="660" y="22.899999999999977" width="137.89" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="h_Pjg7v3YA9R5ozHN4wc-27" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="XQuHplglNApcFHOVQP9D-75" source="h_Pjg7v3YA9R5ozHN4wc-28" target="h_Pjg7v3YA9R5ozHN4wc-26">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="h_Pjg7v3YA9R5ozHN4wc-28" value="numero di&lt;br&gt;TP/FP/FN" style="sketch=0;aspect=fixed;pointerEvents=1;shadow=0;dashed=0;html=1;strokeColor=none;labelPosition=center;verticalLabelPosition=top;verticalAlign=bottom;align=center;fillColor=#00188D;shape=mxgraph.mscae.enterprise.document" vertex="1" parent="XQuHplglNApcFHOVQP9D-75">
+          <mxGeometry x="570" y="47.89999999999998" width="40" height="50" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
